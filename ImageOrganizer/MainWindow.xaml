@@ -5,34 +5,52 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ImageOrganizer"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" ><!--WindowState="Maximized"-->
+        FontSize="10" FontFamily="Calibri"
+        Title="MainWindow" Height="600" Width="1000" ><!--WindowState="Maximized"-->
   <Grid Margin="10">
 
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
+      <RowDefinition Height="20" />
     </Grid.RowDefinitions>
 
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="*" />
       <ColumnDefinition Width="Auto" />
     </Grid.ColumnDefinitions>
+
+    <StackPanel Orientation="Horizontal" Margin="10">
+      <Label Content="Image Source" />
+      <ComboBox Grid.Row="0" Height="23" Width="200" Name="Folders" Grid.Column="1" SelectedIndex="0">
+        <ComboBoxItem Content="None"/>
+      </ComboBox>
+      <Button x:Name="btnScanFolder" Margin="5,0,0,0" Click="ButtonScanFolder_Click">Scan Folder</Button>
+      <Button x:Name="btnAddFolder" Margin="5,0,0,0" Click="ButtonAddFolder_Click">Add Folder</Button>
+    </StackPanel>
     
     <Image 
-      Grid.Column="0" HorizontalAlignment="Left" Name="imgMain" 
-      Width="400" Height="400"
+      Grid.Row="1"
+      Grid.Column="0" Name="imgMain" 
+      HorizontalAlignment="Center" VerticalAlignment="Center"
       Source="C:\Users\Usuario\source\repos\ImageOrganizer\ImageOrganizer\Resources\init.jpg" />
 
-    <StackPanel Grid.Row="0" Grid.Column="1" Margin="5,0,0,0">
-      <TextBox x:Name="txtName" />
-      <Button x:Name="btnAdd" Margin="0,5,0,0" Click="ButtonAddName_Click">Add Name</Button>
+    <StackPanel Width="100"  Grid.Row="1" Grid.Column="1">
+      <Button x:Name="btnNext">Next</Button>
+      <StackPanel Orientation="Horizontal">
+        <Button x:Name="btnRotateLeft" Width="50">
+          <Image Source="Resources\btn\Arrow-Rotate-Left.png" Width="16"></Image>
+        </Button>
+        <Button x:Name="btnRotateRight" Width="50">
+          <Image Source="Resources\btn\Arrow-Rotate-Right.png" Width="16"></Image>
+        </Button>
+      </StackPanel>
+
+      <Button x:Name="btnUndo">Undo</Button>
     </StackPanel>
 
-    <ComboBox Grid.Row="0" Height="23" Name="comboBox1" Grid.Column="1">
-      <ComboBoxItem Content="Alice"/>
-      <ComboBoxItem Content="Bob"/>
-      <ComboBoxItem Content="Charlie"/>
-    </ComboBox>
+    <Label x:Name="lblBottomLeft" Content="Footer" Grid.Row="2" Grid.Column="0" />
+    <Label x:Name="lblBottomRight" Content="Waiting" Grid.Row="2" Grid.Column="1" />
     
   </Grid>
 

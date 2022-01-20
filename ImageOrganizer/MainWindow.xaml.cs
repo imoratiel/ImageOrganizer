@@ -24,21 +24,29 @@ namespace ImageOrganizer
         {
             InitializeComponent();
 
-        }
-
-        #region EVENTS
-        private void ButtonAddName_Click(object sender, RoutedEventArgs e)
-        {
-
+            /*
             BitmapImage bitmap = new BitmapImage();
             bitmap.BeginInit();
             bitmap.UriSource = new Uri(@"Resources\load.jpg", UriKind.Relative); 
             bitmap.CacheOption = BitmapCacheOption.OnLoad;
-
             bitmap.EndInit();
 
-            imgMain.Source = bitmap;
             imgMain.Stretch = Stretch.Uniform;
+            
+            imgMain.Source = bitmap;
+            */
+        }
+
+        #region EVENTS
+        private void ButtonScanFolder_Click(object sender, RoutedEventArgs e)
+        {
+
+           
+        }
+
+        private void ButtonAddFolder_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
         #endregion
