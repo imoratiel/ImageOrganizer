@@ -33,16 +33,16 @@
       Grid.Row="1"
       Grid.Column="0" Name="imgMain" 
       HorizontalAlignment="Center" VerticalAlignment="Center"
-      Source="C:\Users\Usuario\source\repos\ImageOrganizer\ImageOrganizer\Resources\init.jpg" />
+      Source="pack://application:,,,/Images\init.jpg" />
 
     <StackPanel Width="100"  Grid.Row="1" Grid.Column="1">
       <Button x:Name="btnNext">Next</Button>
       <StackPanel Orientation="Horizontal">
         <Button x:Name="btnRotateLeft" Width="50">
-          <Image Source="Resources\btn\Arrow-Rotate-Left.png" Width="16"></Image>
+          <Image Source="pack://application:,,,/Images/btn/Arrow-Rotate-Left.png" Width="16"></Image>
         </Button>
         <Button x:Name="btnRotateRight" Width="50">
-          <Image Source="Resources\btn\Arrow-Rotate-Right.png" Width="16"></Image>
+          <Image Source="pack://application:,,,/Images/btn/Arrow-Rotate-Right.png" Width="16"></Image>
         </Button>
       </StackPanel>
 

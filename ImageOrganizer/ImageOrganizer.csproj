@@ -4,23 +4,28 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
+	<UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Resources\" />
+    <None Remove="Images\btn\Arrow-Rotate-Left.png" />
+    <None Remove="Images\btn\Arrow-Rotate-Right.png" />
+    <None Remove="Images\init.jpg" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Resources\btn\Arrow-Rotate-Left.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\btn\Arrow-Rotate-Right.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\init.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\load.jpg">
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="6.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\btn\Arrow-Rotate-Left.png" />
+    <Resource Include="Images\btn\Arrow-Rotate-Right.png" />
+    <Resource Include="Images\init.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.13" />
+    <None Update="Images\load.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
