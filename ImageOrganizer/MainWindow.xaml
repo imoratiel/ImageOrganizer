@@ -6,52 +6,115 @@
         xmlns:local="clr-namespace:ImageOrganizer"
         mc:Ignorable="d"
         FontSize="10" FontFamily="Calibri"
-        Title="MainWindow" Height="800" Width="1200" ><!--WindowState="Maximized"-->
-  <Grid Margin="10">
+        Title="MainWindow" Height="800" Width="1200" >
+    <!--WindowState="Maximized"-->
 
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="*" />
-      <RowDefinition Height="20" />
-    </Grid.RowDefinitions>
+    <Window.Resources>
+        <Style x:Key="ButtonFocusVisual">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle Margin="2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <LinearGradientBrush x:Key="ButtonNormalBackground" EndPoint="0,1" StartPoint="0,0">
+            <GradientStop Color="#F3F3F3" Offset="0"/>
+            <GradientStop Color="#EBEBEB" Offset="0.5"/>
+            <GradientStop Color="#DDDDDD" Offset="0.5"/>
+            <GradientStop Color="#CDCDCD" Offset="1"/>
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="ButtonNormalBorder" Color="#FF707070"/>
+        <Style x:Key="ToggleButtonStyle1" TargetType="{x:Type ToggleButton}">
+            <Setter Property="FocusVisualStyle" Value="{StaticResource ButtonFocusVisual}"/>
+            <Setter Property="Background" Value="{StaticResource ButtonNormalBackground}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource ButtonNormalBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            <Border x:Name="on" Width="25" Height="25" Background="LightGray" CornerRadius="2,0,0,4" Margin="10,0,0,0">
+                                <TextBlock x:Name="onText" Text="On" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border x:Name="off" Width="25" Height="25" Background="LightGray" CornerRadius="0,2,4,0">
+                                <TextBlock x:Name="offText" Text="Off" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="#ADADAD"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="true">
+                                <Setter TargetName="on" Property="Background" Value="LightBlue"/>
+                                <Setter TargetName="onText" Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="False">
+                                <Setter TargetName="off" Property="Background" Value="LightBlue"/>
+                                <Setter TargetName="offText" Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
 
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="*" />
-      <ColumnDefinition Width="Auto" />
-    </Grid.ColumnDefinitions>
+    <Grid Margin="10">
 
-    <StackPanel Orientation="Horizontal" Margin="10">
-      <Label Content="Image Source" />
-      <ComboBox x:Name="CbdFolder" Grid.Row="0" Height="23" Width="200" Grid.Column="1" SelectedIndex="0">
-        <ComboBoxItem Content="None"/>
-      </ComboBox>
-      <Button x:Name="btnScanFolder" Margin="5,0,0,0" Click="ButtonScanFolder_Click">Scan Folder</Button>
-      <Button x:Name="btnAddFolder" Margin="5,0,0,0" Click="ButtonAddFolder_Click">Add Folder</Button>
-    </StackPanel>
-    
-    <Image 
-      Grid.Row="1"
-      Grid.Column="0" Name="imgMain" 
-      HorizontalAlignment="Center" VerticalAlignment="Center"
-      Source="pack://application:,,,/Images\init.jpg" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="0" />
+        </Grid.RowDefinitions>
 
-    <StackPanel Width="100"  Grid.Row="1" Grid.Column="1">
-      <Button x:Name="btnNext">Next</Button>
-      <StackPanel Orientation="Horizontal">
-        <Button x:Name="btnRotateLeft" Width="50">
-          <Image Source="pack://application:,,,/Images/btn/Arrow-Rotate-Left.png" Width="16"></Image>
-        </Button>
-        <Button x:Name="btnRotateRight" Width="50">
-          <Image Source="pack://application:,,,/Images/btn/Arrow-Rotate-Right.png" Width="16"></Image>
-        </Button>
-      </StackPanel>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
 
-      <Button x:Name="btnUndo">Undo</Button>
-    </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="10">
+            <Label Content="Image Source" />
+            <ComboBox x:Name="CbdFolder" Grid.Row="0" Height="23" Width="200" Grid.Column="1" SelectedIndex="0">
+                <ComboBoxItem Content="None"/>
+            </ComboBox>
+            <Button x:Name="btnScanFolder" Margin="5,0,0,0" Click="ButtonScanFolder_Click">Scan Folder</Button>
+            <Button x:Name="btnAddFolder" Margin="5,0,0,0" Click="ButtonAddFolder_Click">Add Folder</Button>
+        </StackPanel>
 
-    <Label x:Name="lblBottomLeft" Content="Footer" Grid.Row="2" Grid.Column="0" />
-    <Label x:Name="lblBottomRight" Content="Waiting" Grid.Row="2" Grid.Column="1" />
-    
-  </Grid>
+        <Image Grid.Row="1" Grid.Column="0" Name="imgMain" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform" />
+        <!--="pack://application:,,,/Images\init.jpg" -->
+
+        <StackPanel Width="110"  Grid.Row="1" Grid.Column="1">
+            <Button x:Name="btnNext">Next</Button>
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                <Button x:Name="btnRotateLeft" Width="55" Click="ButtonRotate_Click">
+                    <Image Source="pack://application:,,,/Images/btn/Arrow-Rotate-Left.png" Width="16"></Image>
+                </Button>
+                <Button x:Name="btnRotateRight" Width="55" Click="ButtonRotate_Click">
+                    <Image Source="pack://application:,,,/Images/btn/Arrow-Rotate-Right.png" Width="16"></Image>
+                </Button>
+            </StackPanel>
+            <Button x:Name="btnUndo" Margin="0,10,0,0">Undo</Button>
+            <Button x:Name="btnOpen" Margin="0,10,0,0">Open</Button>
+            <Button x:Name="btnDelete" Margin="0,10,0,0">Delete</Button>
+
+            <ToggleButton Content="Overwrite" Style="{StaticResource ToggleButtonStyle1}"/>
+            <Label Content="Duplicated!" Margin="0,10,0,0" Foreground="Red" HorizontalAlignment="Center"/>
+            <StackPanel x:Name="SubFoldersButtonPanel">
+
+            </StackPanel>
+        </StackPanel>
+
+        <Label x:Name="lblBottomLeft" Content="Footer" Grid.Row="2" Grid.Column="0" />
+        <Label x:Name="lblBottomRight" Content="Waiting" Grid.Row="2" Grid.Column="1" />
+
+    </Grid>
 
 </Window>
