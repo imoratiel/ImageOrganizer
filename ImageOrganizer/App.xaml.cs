@@ -20,30 +20,32 @@ namespace ImageOrganizer
 
         public IConfiguration Configuration { get; private set; }
 
+        public App()
+        {
+            ServiceCollection services = new ServiceCollection();
+            ConfigureServices(services);
+            ServiceProvider = services.BuildServiceProvider();
+        }
+
         protected override void OnStartup(StartupEventArgs e)
         {
-            var builder = new ConfigurationBuilder()
-             .SetBasePath(Directory.GetCurrentDirectory())
-             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-
-            Configuration = builder.Build();
-
-            Console.WriteLine(Configuration.GetConnectionString("Default"));
-
-            var serviceCollection = new ServiceCollection();
-            ConfigureServices(serviceCollection);
-
-            ServiceProvider = serviceCollection.BuildServiceProvider();
-
-            //var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
+            //MainWindow mainWindow = ServiceProvider.GetService<MainWindow>();
             //mainWindow.Show();
         }
 
         private void ConfigureServices(IServiceCollection services)
         {
-            // ...
+            // Build configuration
+            Configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetParent(AppContext.BaseDirectory).FullName)
+                .AddJsonFile("appsettings.json", false)
+                .Build();
+
+            // Add access to generic IConfigurationRoot
+            services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddTransient(typeof(MainWindow));
+            //services.AddTransient<App>();
         }
     }
 }

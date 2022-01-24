@@ -17,6 +17,9 @@ using System.IO;
 using ImageOrganizer.Classes;
 using System.Drawing;
 using System.Net.Cache;
+using System.Diagnostics;
+using System.Drawing.Imaging;
+using Microsoft.Extensions.Configuration;
 
 namespace ImageOrganizer
 {
@@ -30,17 +33,29 @@ namespace ImageOrganizer
         private List<FolderItem> folderItems = new List<FolderItem>();
         private int imgCount = 0;
 
+        public IConfiguration Configuration { get; private set; }
+
         public enum RotateFlip { left= 0, right = 1 }        
+
+        public MainWindow(IConfiguration configuration)
+        {
+            InitializeComponent();
+
+            Configuration = configuration;
+
+            Initialize();
+        }
 
         public MainWindow()
         {
             InitializeComponent();
 
-            Initialize();
         }
 
         public void Initialize()
         {
+            System.Windows.Forms.MessageBox.Show(Configuration.GetConnectionString("DataConnection"));
+
             AddFolderToCombobox(@"C:\Users\Usuario\Desktop\Test");
         }
 
@@ -75,7 +90,23 @@ namespace ImageOrganizer
                     RotateImage(CurrentFile, RotateFlip.right);
                 }
                 LoadImage(CurrentFile);
-                //LoadImage(@"C:\Users\Usuario\Desktop\Test\_meriialro___CQ35iOcr2-9___.jpg");                
+            }            
+        }
+
+        private void ButtonOpen_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Process p = new Process();
+                p.StartInfo = new ProcessStartInfo(CurrentFile)
+                {
+                    UseShellExecute = true
+                };
+                p.Start();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show(String.Format("Error openning file {0}: {1}", CurrentFile, ex.Message), "Error");
             }            
         }
 
@@ -159,7 +190,7 @@ namespace ImageOrganizer
                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
                 bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
                 bitmap.EndInit();
-                //imgMain.Stretch = Stretch.Uniform;
+                
                 imgMain.Source = bitmap;
                 return true;
             }
@@ -176,7 +207,7 @@ namespace ImageOrganizer
             {
                 Bitmap bitmap = (Bitmap)Bitmap.FromFile(path);
                 bitmap.RotateFlip(rotation == RotateFlip.left ? RotateFlipType.Rotate90FlipXY : RotateFlipType.Rotate270FlipXY);
-                bitmap.Save(path);
+                SaveImage(bitmap, path);
                 return true;
             }
             catch (Exception ex)
@@ -184,6 +215,56 @@ namespace ImageOrganizer
                 System.Windows.Forms.MessageBox.Show(String.Format("Error rotating file {0}: {1}", path, ex.Message), "Error");
                 return false;
             }
+        }
+
+        private void SaveImage(Bitmap bitmap, string filename)
+        {
+            string fileExtension = System.IO.Path.GetExtension(filename);
+                     
+            switch (fileExtension)
+            {
+                case ".jpg":
+                case ".jpeg":
+                    SaveImageJpeg(bitmap, filename);
+                    break;
+                case ".png":
+                    bitmap.Save(filename);
+                    break;
+                case ".bmp":                    
+                    break;
+                case ".gif":
+                    break;
+                default:
+                    break;
+            }
+        }
+        private void SaveImageJpeg(Bitmap bitmap, string filename)
+        {
+            ImageCodecInfo myImageCodecInfo;
+            System.Drawing.Imaging.Encoder myEncoder;
+            EncoderParameter myEncoderParameter;
+            EncoderParameters myEncoderParameters;
+
+            myImageCodecInfo = GetEncoderInfo("image/jpeg");
+            myEncoder = System.Drawing.Imaging.Encoder.Quality;
+
+            myEncoderParameters = new EncoderParameters(1);
+            myEncoderParameter = new EncoderParameter(myEncoder, 100L);
+            myEncoderParameters.Param[0] = myEncoderParameter;
+            bitmap.Save(filename, myImageCodecInfo, myEncoderParameters);
+        }
+
+        private static ImageCodecInfo GetEncoderInfo(String mimeType)
+        {
+            int j;
+            ImageCodecInfo[] encoders;
+            encoders = ImageCodecInfo.GetImageEncoders();
+            for (j = 0; j < encoders.Length; ++j)
+            {
+                if (encoders[j].MimeType == mimeType)
+                    return encoders[j];
+            }
+            return null;
         }
 
         #endregion
