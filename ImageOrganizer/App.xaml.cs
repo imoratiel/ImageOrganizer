@@ -29,8 +29,8 @@ namespace ImageOrganizer
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            //MainWindow mainWindow = ServiceProvider.GetService<MainWindow>();
-            //mainWindow.Show();
+            MainWindow mainWindow = ServiceProvider.GetService<MainWindow>();
+            mainWindow.Show();
         }
 
         private void ConfigureServices(IServiceCollection services)
