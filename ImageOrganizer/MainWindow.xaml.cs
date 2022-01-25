@@ -46,17 +46,17 @@ namespace ImageOrganizer
             Initialize();
         }
 
-        public MainWindow()
-        {
-            InitializeComponent();
-
-        }
-
         public void Initialize()
         {
-            System.Windows.Forms.MessageBox.Show(Configuration.GetConnectionString("DataConnection"));
+            //System.Windows.Forms.MessageBox.Show(Configuration["Position:Title"]);
+            //System.Windows.Forms.MessageBox.Show(Configuration.GetConnectionString("DataConnection"));            
 
-            AddFolderToCombobox(@"C:\Users\Usuario\Desktop\Test");
+            string initialFolder = Configuration["Startup:Folder"];
+            if(initialFolder != null)
+            {
+                AddFolderToCombobox(initialFolder);
+                ScanFolder(initialFolder);
+            }                
         }
 
         #region EVENTS
