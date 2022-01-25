@@ -1,25 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Forms;
-using System.IO;
-using ImageOrganizer.Classes;
-using System.Drawing;
-using System.Net.Cache;
-using System.Diagnostics;
-using System.Drawing.Imaging;
+﻿using ImageOrganizer.Classes;
+using ImageOrganizer.Data;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Linq;
+using System.Net.Cache;
+using System.Windows;
+using System.Windows.Forms;
+using System.Windows.Media.Imaging;
 
 namespace ImageOrganizer
 {
@@ -32,22 +24,27 @@ namespace ImageOrganizer
         private string CurrentFile = null;
         private List<FolderItem> folderItems = new List<FolderItem>();
         private int imgCount = 0;
+        EmployeeDbContext dbContext;
 
         public IConfiguration Configuration { get; private set; }
 
         public enum RotateFlip { left= 0, right = 1 }        
 
-        public MainWindow(IConfiguration configuration)
+        public MainWindow(IConfiguration configuration, EmployeeDbContext dbContext)
         {
             InitializeComponent();
 
-            Configuration = configuration;
+            Initialize(configuration, dbContext);
 
-            Initialize();
+            var employees = dbContext.Employee.ToList();
+            
         }
 
-        public void Initialize()
+        public void Initialize(IConfiguration configuration, EmployeeDbContext dbContext)
         {
+            this.Configuration = configuration;
+            this.dbContext = dbContext;
+
             //System.Windows.Forms.MessageBox.Show(Configuration["Position:Title"]);
             //System.Windows.Forms.MessageBox.Show(Configuration.GetConnectionString("DataConnection"));            
 

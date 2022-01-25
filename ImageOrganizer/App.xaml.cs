@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using ImageOrganizer.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -40,6 +42,11 @@ namespace ImageOrganizer
                 .SetBasePath(Directory.GetParent(AppContext.BaseDirectory).FullName)
                 .AddJsonFile("appsettings.json", false)
                 .Build();
+
+            services.AddDbContext<EmployeeDbContext>(options =>
+            {
+                options.UseSqlite("Data Source = Employee.db");
+            });
 
             // Add access to generic IConfigurationRoot
             services.AddSingleton<IConfiguration>(Configuration);
