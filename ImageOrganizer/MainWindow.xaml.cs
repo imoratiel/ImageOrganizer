@@ -173,6 +173,7 @@ namespace ImageOrganizer
                         Margin = new Thickness(0,5,0,0),
                         Width = 110
                     };
+                    btn.Click += BtnMoveImageToFolder_Click;
                     SubFoldersButtonPanel.Children.Add(btn);
                 }
             }
@@ -180,6 +181,23 @@ namespace ImageOrganizer
             {
                 System.Windows.Forms.MessageBox.Show(ex.Message, "Error");
             }
+        }
+
+        private void BtnMoveImageToFolder_Click(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Controls.Button obj = sender as System.Windows.Controls.Button;
+            //System.Windows.Forms.MessageBox.Show(obj.Content.ToString());
+            //System.Windows.Forms.MessageBox.Show(CurrentFile);
+            try
+            {
+                string selectedFolder = obj.Content.ToString();
+                File.Move(CurrentFile,Path.Combine(CurrentFolder, selectedFolder, System.IO.Path.GetFileName(CurrentFile)));
+            }
+            catch (Exception ex)
+            {
+
+            }
+            ScanFolder(CurrentFolder);
         }
 
         /// <summary>
