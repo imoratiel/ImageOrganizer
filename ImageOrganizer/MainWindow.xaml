@@ -71,7 +71,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="0" />
+            <RowDefinition Height="25" />
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -105,9 +105,9 @@
             <Button x:Name="btnOpen" Margin="0,10,0,0" Click="ButtonOpen_Click">Open</Button>
             <Button x:Name="btnDelete" Margin="0,10,0,0">Delete</Button>
 
-            <ToggleButton Content="Overwrite" Style="{StaticResource ToggleButtonStyle1}"/>
-            <Label Content="Duplicated!" Margin="0,10,0,0" Foreground="Red" HorizontalAlignment="Center"/>
-            <StackPanel x:Name="SubFoldersButtonPanel">
+            <ToggleButton Content="Overwrite" Margin="0,10,0,0" Style="{StaticResource ToggleButtonStyle1}"/>
+            <Label Content="Duplicated!" Margin="0,10,0,0" Foreground="Red" HorizontalAlignment="Center" Visibility="Hidden"/>
+            <StackPanel x:Name="SubFoldersButtonPanel" Width="110">
 
             </StackPanel>
         </StackPanel>

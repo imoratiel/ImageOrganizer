@@ -10,7 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Cache;
 using System.Windows;
-using System.Windows.Forms;
+using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 
 namespace ImageOrganizer
@@ -36,8 +36,7 @@ namespace ImageOrganizer
 
             Initialize(configuration, dbContext);
 
-            var employees = dbContext.Employee.ToList();
-            
+            //var employees = dbContext.Employee.ToList();            
         }
 
         public void Initialize(IConfiguration configuration, EmployeeDbContext dbContext)
@@ -47,10 +46,10 @@ namespace ImageOrganizer
 
             //System.Windows.Forms.MessageBox.Show(Configuration["Position:Title"]);
             //System.Windows.Forms.MessageBox.Show(Configuration.GetConnectionString("DataConnection"));            
-
-            string initialFolder = Configuration["Startup:Folder"];
-            if(initialFolder != null)
+                        
+            if(bool.Parse(Configuration["Startup:Enabled"]))
             {
+                string initialFolder = Configuration["Startup:Folder"];
                 AddFolderToCombobox(initialFolder);
                 ScanFolder(initialFolder);
             }                
@@ -64,8 +63,8 @@ namespace ImageOrganizer
 
         private void ButtonAddFolder_Click(object sender, RoutedEventArgs e)
         {
-            FolderBrowserDialog fbd = new FolderBrowserDialog();            
-            DialogResult result = fbd.ShowDialog();
+            System.Windows.Forms.FolderBrowserDialog fbd = new System.Windows.Forms.FolderBrowserDialog();
+            System.Windows.Forms.DialogResult result = fbd.ShowDialog();
 
             if (result == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
             {
@@ -141,8 +140,9 @@ namespace ImageOrganizer
         {
             try
             {
+                // Images
                 string[] fileExtension = new string[] { ".jpg", ".png", ".jpeg", ".bmp",".gif" };
-                List<string> ImagesInDirectory = Directory.GetFiles(folder, "*.*", SearchOption.AllDirectories)
+                List<string> ImagesInDirectory = Directory.GetFiles(folder, "*.*", SearchOption.TopDirectoryOnly)
                     .Where(file => fileExtension.Contains(System.IO.Path.GetExtension(file).ToLower()))
                     .ToList();
 
@@ -160,7 +160,21 @@ namespace ImageOrganizer
                 {
                     CurrentFile = null;
                     lblBottomLeft.Content = string.Format("Not Loaded {0}", System.IO.Path.GetFileName(image));
-                }                
+                }
+
+                //Folder Scanning
+                string[] directories = Directory.GetDirectories(folder, "*", SearchOption.TopDirectoryOnly);                
+                foreach (string item in directories)
+                {
+                    Button btn = new Button()
+                    {
+                        Content = System.IO.Path.GetFileName(item),
+                        HorizontalAlignment = HorizontalAlignment.Left,
+                        Margin = new Thickness(0,5,0,0),
+                        Width = 110
+                    };
+                    SubFoldersButtonPanel.Children.Add(btn);
+                }
             }
             catch (Exception ex)
             {
