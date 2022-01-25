@@ -45,7 +45,6 @@ namespace ImageOrganizer
             services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddTransient(typeof(MainWindow));
-            //services.AddTransient<App>();
         }
     }
 }
