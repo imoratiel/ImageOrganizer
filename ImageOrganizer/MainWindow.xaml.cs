@@ -1,6 +1,8 @@
 ﻿using ImageOrganizer.Classes;
 using ImageOrganizer.Data;
 using Microsoft.Extensions.Configuration;
+using Notification.Wpf;
+using Notification.Wpf.Classes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,6 +11,8 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net.Cache;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
@@ -25,10 +29,11 @@ namespace ImageOrganizer
         private List<FolderItem> folderItems = new List<FolderItem>();
         private int imgCount = 0;
         EmployeeDbContext dbContext;
+        private NotificationManager notificationManager;
 
         public IConfiguration Configuration { get; private set; }
 
-        public enum RotateFlip { left= 0, right = 1 }        
+        public enum RotateFlip { left = 0, right = 1 }
 
         public MainWindow(IConfiguration configuration, EmployeeDbContext dbContext)
         {
@@ -37,28 +42,27 @@ namespace ImageOrganizer
             Initialize(configuration, dbContext);
 
             //var employees = dbContext.Employee.ToList();            
+
         }
 
         public void Initialize(IConfiguration configuration, EmployeeDbContext dbContext)
         {
+            this.notificationManager = new NotificationManager();
             this.Configuration = configuration;
             this.dbContext = dbContext;
 
-            //System.Windows.Forms.MessageBox.Show(Configuration["Position:Title"]);
-            //System.Windows.Forms.MessageBox.Show(Configuration.GetConnectionString("DataConnection"));            
-                        
-            if(bool.Parse(Configuration["Startup:Enabled"]))
+            if (bool.Parse(Configuration["Startup:Enabled"]))
             {
                 string initialFolder = Configuration["Startup:Folder"];
                 AddFolderToCombobox(initialFolder);
                 ScanFolder(initialFolder);
-            }                
+            }
         }
 
         #region EVENTS
         private void ButtonScanFolder_Click(object sender, RoutedEventArgs e)
         {
-           ScanFolder(CurrentFolder);
+            ScanFolder(CurrentFolder);
         }
 
         private void ButtonAddFolder_Click(object sender, RoutedEventArgs e)
@@ -80,13 +84,13 @@ namespace ImageOrganizer
                 if (obj.Name == "btnRotateLeft")
                 {
                     RotateImage(CurrentFile, RotateFlip.left);
-                } 
+                }
                 else
                 {
                     RotateImage(CurrentFile, RotateFlip.right);
                 }
                 LoadImage(CurrentFile);
-            }            
+            }
         }
 
         private void ButtonOpen_Click(object sender, RoutedEventArgs e)
@@ -103,7 +107,7 @@ namespace ImageOrganizer
             catch (Exception ex)
             {
                 System.Windows.Forms.MessageBox.Show(String.Format("Error openning file {0}: {1}", CurrentFile, ex.Message), "Error");
-            }            
+            }
         }
 
         #endregion
@@ -140,8 +144,37 @@ namespace ImageOrganizer
         {
             try
             {
+                SubFoldersButtonPanel.Children.Clear();
+
+                //Folder Scanning
+                string[] directories = Directory.GetDirectories(folder, "*", SearchOption.TopDirectoryOnly);
+                foreach (string item in directories)
+                {
+                    Button btn = new Button()
+                    {
+                        Content = System.IO.Path.GetFileName(item),
+                        HorizontalAlignment = HorizontalAlignment.Left,
+                        Margin = new Thickness(0, 5, 0, 0),
+                        Width = 110
+                    };
+                    btn.Click += BtnMoveImageToFolder_Click;
+                    SubFoldersButtonPanel.Children.Add(btn);
+                }
+
+                LoadNextImage(folder);
+            }
+            catch (Exception ex)
+            {
+                ShowErrorMessage(ex.Message);
+            }
+        }
+
+        private void LoadNextImage(string folder)
+        {
+            try
+            {
                 // Images
-                string[] fileExtension = new string[] { ".jpg", ".png", ".jpeg", ".bmp",".gif" };
+                string[] fileExtension = new string[] { ".jpg", ".png", ".jpeg", ".bmp", ".gif" };
                 List<string> ImagesInDirectory = Directory.GetFiles(folder, "*.*", SearchOption.TopDirectoryOnly)
                     .Where(file => fileExtension.Contains(System.IO.Path.GetExtension(file).ToLower()))
                     .ToList();
@@ -161,43 +194,27 @@ namespace ImageOrganizer
                     CurrentFile = null;
                     lblBottomLeft.Content = string.Format("Not Loaded {0}", System.IO.Path.GetFileName(image));
                 }
-
-                //Folder Scanning
-                string[] directories = Directory.GetDirectories(folder, "*", SearchOption.TopDirectoryOnly);                
-                foreach (string item in directories)
-                {
-                    Button btn = new Button()
-                    {
-                        Content = System.IO.Path.GetFileName(item),
-                        HorizontalAlignment = HorizontalAlignment.Left,
-                        Margin = new Thickness(0,5,0,0),
-                        Width = 110
-                    };
-                    btn.Click += BtnMoveImageToFolder_Click;
-                    SubFoldersButtonPanel.Children.Add(btn);
-                }
             }
             catch (Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show(ex.Message, "Error");
+                ShowErrorMessage(ex.Message);
             }
         }
 
         private void BtnMoveImageToFolder_Click(object sender, RoutedEventArgs e)
         {
             System.Windows.Controls.Button obj = sender as System.Windows.Controls.Button;
-            //System.Windows.Forms.MessageBox.Show(obj.Content.ToString());
-            //System.Windows.Forms.MessageBox.Show(CurrentFile);
+
             try
             {
                 string selectedFolder = obj.Content.ToString();
-                File.Move(CurrentFile,Path.Combine(CurrentFolder, selectedFolder, System.IO.Path.GetFileName(CurrentFile)));
+                File.Move(CurrentFile, Path.Combine(CurrentFolder, selectedFolder, System.IO.Path.GetFileName(CurrentFile)));
+                LoadNextImage(CurrentFolder);
             }
             catch (Exception ex)
             {
-
+                ShowErrorMessage(ex.Message);
             }
-            ScanFolder(CurrentFolder);
         }
 
         /// <summary>
@@ -219,15 +236,15 @@ namespace ImageOrganizer
                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
                 bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
                 bitmap.EndInit();
-                
+
                 imgMain.Source = bitmap;
                 return true;
             }
             catch (Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show(String.Format("Error openning file {0}: {1}", imgPath, ex.Message), "Error");
-                return false; 
-            }            
+                ShowErrorMessage(String.Format("Error openning file {0}: {1}", imgPath, ex.Message));
+                return false;
+            }
         }
 
         private bool RotateImage(string path, RotateFlip rotation)
@@ -241,7 +258,7 @@ namespace ImageOrganizer
             }
             catch (Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show(String.Format("Error rotating file {0}: {1}", path, ex.Message), "Error");
+                ShowErrorMessage(String.Format("Error rotating file {0}: {1}", path, ex.Message));
                 return false;
             }
         }
@@ -249,7 +266,7 @@ namespace ImageOrganizer
         private void SaveImage(Bitmap bitmap, string filename)
         {
             string fileExtension = System.IO.Path.GetExtension(filename);
-                     
+
             switch (fileExtension)
             {
                 case ".jpg":
@@ -259,7 +276,7 @@ namespace ImageOrganizer
                 case ".png":
                     bitmap.Save(filename);
                     break;
-                case ".bmp":                    
+                case ".bmp":
                     break;
                 case ".gif":
                     break;
@@ -296,6 +313,29 @@ namespace ImageOrganizer
             return null;
         }
 
+        #endregion
+
+        #region ERRORS
+        private void ShowErrorMessage(string message, Action method = null)
+        {
+            ShowMessage("Error", message, System.Windows.Media.Colors.Red, System.Windows.Media.Colors.White, 5, method);
+        }
+        private void ShowMessage(string title, string message, System.Windows.Media.Color foreground, System.Windows.Media.Color background, int seconds, Action method)
+        {
+            NotificationContent content = new NotificationContent
+            {
+                Title = title,
+                Message = message,
+                Type = NotificationType.Warning,                
+                RowsCount = 3, //Will show 3 rows and trim after
+                LeftButtonAction = method, 
+                //RightButtonAction = () => SomeAction(), //Action on right button click,  button will not show if it null                
+                CloseOnClick = true, // Set true if u want close message when left mouse button click on message (base = true)
+                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red),
+                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.White)
+            };
+            notificationManager.Show(content, null, new TimeSpan(0,0,seconds));
+        }
         #endregion
     }
 }

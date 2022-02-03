@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ImageOrganizer"
         mc:Ignorable="d"
         FontSize="10" FontFamily="Calibri"
-        Title="MainWindow" Height="800" Width="1200" >
+        Title="MainWindow" Height="1200" Width="1600" >
     <!--WindowState="Maximized"-->
 
     <Window.Resources>
@@ -106,15 +106,17 @@
             <Button x:Name="btnDelete" Margin="0,10,0,0">Delete</Button>
 
             <ToggleButton Content="Overwrite" Margin="0,10,0,0" Style="{StaticResource ToggleButtonStyle1}"/>
-            <Label Content="Duplicated!" Margin="0,10,0,0" Foreground="Red" HorizontalAlignment="Center" Visibility="Hidden"/>
+            
             <StackPanel x:Name="SubFoldersButtonPanel" Width="110">
 
             </StackPanel>
+            <Label Content="Duplicated!" Margin="0,10,0,0" Foreground="Red" HorizontalAlignment="Center"/>
         </StackPanel>
 
         <Label x:Name="lblBottomLeft" Content="Footer" Grid.Row="2" Grid.Column="0" />
         <Label x:Name="lblBottomRight" Content="Waiting" Grid.Row="2" Grid.Column="1" />
 
     </Grid>
+    
 
 </Window>
