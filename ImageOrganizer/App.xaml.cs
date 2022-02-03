@@ -43,9 +43,9 @@ namespace ImageOrganizer
                 .AddJsonFile("appsettings.json", false)
                 .Build();
 
-            services.AddDbContext<EmployeeDbContext>(options =>
+            services.AddDbContext<FileActionDbContext>(options =>
             {
-                options.UseSqlite("Data Source = Employee.db");
+                options.UseSqlite("Data Source = FileAction.db");
             });
 
             // Add access to generic IConfigurationRoot

@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="C:\Users\Usuario\.nuget\packages\nlog.config\4.7.13\contentFiles\any\any\NLog.config" />
     <None Remove="Images\btn\Arrow-Rotate-Left.png" />
     <None Remove="Images\btn\Arrow-Rotate-Right.png" />
     <None Remove="Images\init.jpg" />
@@ -19,11 +20,9 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+    <PackageReference Include="NLog" Version="4.7.13" />
+    <PackageReference Include="NLog.Config" Version="4.7.13" />
     <PackageReference Include="Notification.Wpf" Version="6.1.0.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\ImageOrganizer.Services\ImageOrganizer.Services.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,6 +1,7 @@
 ﻿using ImageOrganizer.Classes;
 using ImageOrganizer.Data;
 using Microsoft.Extensions.Configuration;
+using NLog;
 using Notification.Wpf;
 using Notification.Wpf.Classes;
 using System;
@@ -24,28 +25,30 @@ namespace ImageOrganizer
     /// </summary>
     public partial class MainWindow : Window
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         private string CurrentFolder = "";
         private string CurrentFile = null;
         private List<FolderItem> folderItems = new List<FolderItem>();
         private int imgCount = 0;
-        EmployeeDbContext dbContext;
+        private FileActionDbContext dbContext;
         private NotificationManager notificationManager;
 
         public IConfiguration Configuration { get; private set; }
 
         public enum RotateFlip { left = 0, right = 1 }
 
-        public MainWindow(IConfiguration configuration, EmployeeDbContext dbContext)
+        public MainWindow(IConfiguration configuration, FileActionDbContext dbContext)
         {
             InitializeComponent();
 
             Initialize(configuration, dbContext);
 
-            //var employees = dbContext.Employee.ToList();            
-
+            var actions = dbContext.FileAction.ToList();
+            logger.Debug("blah");
         }
 
-        public void Initialize(IConfiguration configuration, EmployeeDbContext dbContext)
+        public void Initialize(IConfiguration configuration, FileActionDbContext dbContext)
         {
             this.notificationManager = new NotificationManager();
             this.Configuration = configuration;

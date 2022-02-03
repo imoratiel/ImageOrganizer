@@ -92,7 +92,13 @@
         <!--="pack://application:,,,/Images\init.jpg" -->
 
         <StackPanel Width="110"  Grid.Row="1" Grid.Column="1">
-            <Button x:Name="btnNext">Next</Button>
+            
+            <Button x:Name="btnOpen" Margin="0,0,0,0" Click="ButtonOpen_Click">Open</Button>
+
+            <Button x:Name="btnSkip" Margin="0,10,0,0">Skip</Button>
+
+            <Button x:Name="btnDelete" Margin="0,10,0,0" Foreground="Red">Delete</Button>
+
             <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                 <Button x:Name="btnRotateLeft" Width="55" Click="ButtonRotate_Click">
                     <Image Source="pack://application:,,,/Images/btn/Arrow-Rotate-Left.png" Width="16"></Image>
@@ -101,16 +107,18 @@
                     <Image Source="pack://application:,,,/Images/btn/Arrow-Rotate-Right.png" Width="16"></Image>
                 </Button>
             </StackPanel>
-            <Button x:Name="btnUndo" Margin="0,10,0,0">Undo</Button>
-            <Button x:Name="btnOpen" Margin="0,10,0,0" Click="ButtonOpen_Click">Open</Button>
-            <Button x:Name="btnDelete" Margin="0,10,0,0">Delete</Button>
 
-            <ToggleButton Content="Overwrite" Margin="0,10,0,0" Style="{StaticResource ToggleButtonStyle1}"/>
-            
-            <StackPanel x:Name="SubFoldersButtonPanel" Width="110">
+            <Button x:Name="btnUndo" Margin="0,10,0,0">Undo</Button>
+
+            <StackPanel x:Name="SubFoldersButtonPanel" Width="110" Margin="0,30,0,0">
 
             </StackPanel>
-            <Label Content="Duplicated!" Margin="0,10,0,0" Foreground="Red" HorizontalAlignment="Center"/>
+
+            <StackPanel Width="110" Margin="0,30,0,0" VerticalAlignment="Bottom">
+                <Label Content="If File Exists..." Margin="0,10,0,0" HorizontalAlignment="Center"/>
+                <ToggleButton Content="Overwrite" Margin="0,0,0,0" Style="{StaticResource ToggleButtonStyle1}"/>
+            </StackPanel>            
+            
         </StackPanel>
 
         <Label x:Name="lblBottomLeft" Content="Footer" Grid.Row="2" Grid.Column="0" />
