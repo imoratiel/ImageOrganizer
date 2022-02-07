@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ImageOrganizer.Data
+namespace ImageOrganizer.Model
 {
     public enum ActionType
     {

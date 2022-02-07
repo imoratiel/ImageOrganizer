@@ -1,0 +1,43 @@
+﻿using ImageOrganizer.Model;
+using NLog;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace ImageOrganizer.Repositories
+{
+    public class FileActionRepository
+    {
+        private FileActionDbContext dbContext;
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
+        public FileActionRepository(FileActionDbContext dbcontext)
+        {
+            this.dbContext = dbcontext;
+        }
+
+        public void AddAction(ActionType actionType, string source, string destination)
+        {
+            dbContext.Add(new FileAction(actionType, source, destination));
+            dbContext.SaveChanges();
+#if DEBUG
+            Print();
+#endif
+        }
+
+        public List<FileAction> GetAll()
+        {
+            return dbContext.FileAction.ToList();
+        }
+
+        public void Print()
+        {
+            List<FileAction> items = this.GetAll();
+            foreach (FileAction item in items)
+            {
+                logger.Debug(string.Format("Item {0} {1} {2} {3} {4}", item.Id, item.actionType, item.source, item.destination, item.timestamp));
+            }
+        }
+    }
+}

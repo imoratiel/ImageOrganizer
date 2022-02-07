@@ -1,9 +1,9 @@
 ﻿using ImageOrganizer.Classes;
-using ImageOrganizer.Data;
+using ImageOrganizer.Model;
+using ImageOrganizer.Repositories;
 using Microsoft.Extensions.Configuration;
 using NLog;
 using Notification.Wpf;
-using Notification.Wpf.Classes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,8 +12,6 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net.Cache;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
@@ -26,13 +24,11 @@ namespace ImageOrganizer
     public partial class MainWindow : Window
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
-
         private string CurrentFolder = "";
         private string CurrentFile = null;
-        private List<FolderItem> folderItems = new List<FolderItem>();
-        private int imgCount = 0;
-        private FileActionDbContext dbContext;
+        private List<FolderItem> folderItems = new List<FolderItem>();                
         private NotificationManager notificationManager;
+        private FileActionRepository fileActionRepository;
 
         public IConfiguration Configuration { get; private set; }
 
@@ -42,17 +38,19 @@ namespace ImageOrganizer
         {
             InitializeComponent();
 
-            Initialize(configuration, dbContext);
+            Initialize(configuration);
 
-            var actions = dbContext.FileAction.ToList();
-            logger.Debug("blah");
+            fileActionRepository = new FileActionRepository(dbContext);
+
+            //var actions = dbContext.FileAction.ToList();            
+
+            fileActionRepository.AddAction(ActionType.RotateLeft, "test", "demo");
         }
 
-        public void Initialize(IConfiguration configuration, FileActionDbContext dbContext)
+        public void Initialize(IConfiguration configuration)
         {
             this.notificationManager = new NotificationManager();
             this.Configuration = configuration;
-            this.dbContext = dbContext;
 
             if (bool.Parse(Configuration["Startup:Enabled"]))
             {
@@ -184,7 +182,6 @@ namespace ImageOrganizer
 
                 int numberOfFiles = ImagesInDirectory.Count();
                 lblBottomRight.Content = String.Format("{0} of {1}", 1, numberOfFiles);
-                imgCount = 0;
 
                 string image = ImagesInDirectory.First();
                 if (LoadImage(image))
@@ -211,7 +208,9 @@ namespace ImageOrganizer
             try
             {
                 string selectedFolder = obj.Content.ToString();
-                File.Move(CurrentFile, Path.Combine(CurrentFolder, selectedFolder, System.IO.Path.GetFileName(CurrentFile)));
+                string destination = Path.Combine(CurrentFolder, selectedFolder, System.IO.Path.GetFileName(CurrentFile));
+                File.Move(CurrentFile, destination);
+                fileActionRepository.AddAction(ActionType.Move, CurrentFile, destination);
                 LoadNextImage(CurrentFolder);
             }
             catch (Exception ex)

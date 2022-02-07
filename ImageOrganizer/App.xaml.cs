@@ -1,15 +1,12 @@
-﻿using ImageOrganizer.Data;
+﻿using ImageOrganizer.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
+using NLog.Web;
+using Microsoft.Extensions.Logging;
 
 namespace ImageOrganizer
 {
@@ -45,7 +42,16 @@ namespace ImageOrganizer
 
             services.AddDbContext<FileActionDbContext>(options =>
             {
-                options.UseSqlite("Data Source = FileAction.db");
+                var folder = Environment.SpecialFolder.LocalApplicationData;
+                var path = Environment.GetFolderPath(folder);
+                string DbPath = System.IO.Path.Join(path, "FileAction.db");
+                options.UseSqlite($"Data Source={DbPath}");
+            });
+
+            services.AddLogging(builder =>
+            {
+                builder.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
+                builder.AddNLog("nlog.config");
             });
 
             // Add access to generic IConfigurationRoot
