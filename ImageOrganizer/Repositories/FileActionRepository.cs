@@ -26,6 +26,21 @@ namespace ImageOrganizer.Repositories
 #endif
         }
 
+        public FileAction GetLastItem()
+        {
+            return dbContext.FileAction!=null && dbContext.FileAction.Count() > 0 ? dbContext.FileAction.OrderByDescending(x => x.timestamp).FirstOrDefault() : null;
+        }
+
+        public void RemoveLastItem()
+        {
+            if(dbContext.FileAction != null && dbContext.FileAction.Count() > 0)
+            {
+                FileAction lastItem = GetLastItem();
+                dbContext.FileAction.Remove(lastItem);
+                dbContext.SaveChanges();
+            }
+        }
+
         public List<FileAction> GetAll()
         {
             return dbContext.FileAction.ToList();

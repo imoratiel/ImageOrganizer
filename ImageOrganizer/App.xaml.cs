@@ -54,7 +54,6 @@ namespace ImageOrganizer
                 builder.AddNLog("nlog.config");
             });
 
-            // Add access to generic IConfigurationRoot
             services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddTransient(typeof(MainWindow));

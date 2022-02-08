@@ -42,9 +42,8 @@ namespace ImageOrganizer
 
             fileActionRepository = new FileActionRepository(dbContext);
 
-            //var actions = dbContext.FileAction.ToList();            
-
-            fileActionRepository.AddAction(ActionType.RotateLeft, "test", "demo");
+            logger.Debug(string.Format("Current Action Queue"));
+            fileActionRepository.Print();
         }
 
         public void Initialize(IConfiguration configuration)
@@ -107,7 +106,51 @@ namespace ImageOrganizer
             }
             catch (Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show(String.Format("Error openning file {0}: {1}", CurrentFile, ex.Message), "Error");
+                ShowErrorMessage(String.Format("Error openning file {0}: {1}", CurrentFile, ex.Message));
+            }
+        }
+
+        private void ButtonUndo_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                FileAction lastAction = fileActionRepository.GetLastItem();
+                if(lastAction != null)
+                {
+                    switch (lastAction.actionType)
+                    {
+                        case ActionType.Move:
+                            File.Move(lastAction.destination, lastAction.source);
+                            fileActionRepository.RemoveLastItem();
+                            LoadNextImage(CurrentFolder);
+                            break;
+                        case ActionType.Delete:
+                            fileActionRepository.RemoveLastItem();
+                            break;
+                        case ActionType.RoteteRight:
+                            fileActionRepository.RemoveLastItem();
+                            break;
+                        case ActionType.RotateLeft:
+                            fileActionRepository.RemoveLastItem();
+                            break;
+                        case ActionType.Skip:
+                            fileActionRepository.RemoveLastItem();
+                            break;
+                        default:
+                            ShowErrorMessage("Something smells rotten in Denmark");
+                            break;
+                    }
+
+                    fileActionRepository.Print();
+                }
+                else
+                {
+                    ShowWarningMessage("Action Queue Empty");
+                }                
+            }
+            catch (Exception ex)
+            {
+                ShowErrorMessage(ex.Message);
             }
         }
 
@@ -137,7 +180,7 @@ namespace ImageOrganizer
             }
             else
             {
-                System.Windows.Forms.MessageBox.Show("Folder already exists", "Message");
+                ShowErrorMessage("Folder already exists");
             }
         }
 
@@ -322,6 +365,10 @@ namespace ImageOrganizer
         {
             ShowMessage("Error", message, System.Windows.Media.Colors.Red, System.Windows.Media.Colors.White, 5, method);
         }
+        private void ShowWarningMessage(string message, Action method = null)
+        {
+            ShowMessage("Warning", message, System.Windows.Media.Colors.Orange, System.Windows.Media.Colors.Black, 5, method);
+        }
         private void ShowMessage(string title, string message, System.Windows.Media.Color foreground, System.Windows.Media.Color background, int seconds, Action method)
         {
             NotificationContent content = new NotificationContent
@@ -333,8 +380,8 @@ namespace ImageOrganizer
                 LeftButtonAction = method, 
                 //RightButtonAction = () => SomeAction(), //Action on right button click,  button will not show if it null                
                 CloseOnClick = true, // Set true if u want close message when left mouse button click on message (base = true)
-                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red),
-                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.White)
+                Background = new System.Windows.Media.SolidColorBrush(foreground),
+                Foreground = new System.Windows.Media.SolidColorBrush(background)
             };
             notificationManager.Show(content, null, new TimeSpan(0,0,seconds));
         }
