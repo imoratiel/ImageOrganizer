@@ -109,7 +109,31 @@ namespace ImageOrganizer
                 ShowErrorMessage(String.Format("Error openning file {0}: {1}", CurrentFile, ex.Message));
             }
         }
+        private void BtnMoveImageToFolder_Click(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Controls.Button obj = sender as System.Windows.Controls.Button;
 
+            try
+            {
+                string selectedFolder = obj.Content.ToString();
+                MoveImageToFolder(selectedFolder);
+            }
+            catch (Exception ex)
+            {
+                ShowErrorMessage(ex.Message);
+            }
+        }
+        private void ButtonSkip_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                SkipFile(CurrentFile);
+            }
+            catch (Exception ex)
+            {
+                ShowErrorMessage(ex.Message);
+            }
+        }
         private void ButtonUndo_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -128,9 +152,17 @@ namespace ImageOrganizer
                             fileActionRepository.RemoveLastItem();
                             break;
                         case ActionType.RoteteRight:
+                            if (File.Exists(lastAction.destination))
+                            {
+                                RotateImage(lastAction.destination, RotateFlip.left);
+                            }
                             fileActionRepository.RemoveLastItem();
                             break;
                         case ActionType.RotateLeft:
+                            if (File.Exists(lastAction.destination))
+                            {
+                                RotateImage(CurrentFile, RotateFlip.left);
+                            }                                
                             fileActionRepository.RemoveLastItem();
                             break;
                         case ActionType.Skip:
@@ -183,7 +215,6 @@ namespace ImageOrganizer
                 ShowErrorMessage("Folder already exists");
             }
         }
-
         private void ScanFolder(string folder)
         {
             try
@@ -212,7 +243,6 @@ namespace ImageOrganizer
                 ShowErrorMessage(ex.Message);
             }
         }
-
         private void LoadNextImage(string folder)
         {
             try
@@ -244,26 +274,8 @@ namespace ImageOrganizer
             }
         }
 
-        private void BtnMoveImageToFolder_Click(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Controls.Button obj = sender as System.Windows.Controls.Button;
-
-            try
-            {
-                string selectedFolder = obj.Content.ToString();
-                string destination = Path.Combine(CurrentFolder, selectedFolder, System.IO.Path.GetFileName(CurrentFile));
-                File.Move(CurrentFile, destination);
-                fileActionRepository.AddAction(ActionType.Move, CurrentFile, destination);
-                LoadNextImage(CurrentFolder);
-            }
-            catch (Exception ex)
-            {
-                ShowErrorMessage(ex.Message);
-            }
-        }
-
         /// <summary>
-        /// Returns rtue if image is loaded
+        /// Returns true if image is loaded
         /// </summary>
         /// <param name="imgPath"></param>
         /// <returns></returns>
@@ -291,7 +303,6 @@ namespace ImageOrganizer
                 return false;
             }
         }
-
         private bool RotateImage(string path, RotateFlip rotation)
         {
             try
@@ -307,10 +318,9 @@ namespace ImageOrganizer
                 return false;
             }
         }
-
         private void SaveImage(Bitmap bitmap, string filename)
         {
-            string fileExtension = System.IO.Path.GetExtension(filename);
+            string fileExtension = System.IO.Path.GetExtension(filename).ToLower();
 
             switch (fileExtension)
             {
@@ -344,7 +354,18 @@ namespace ImageOrganizer
             myEncoderParameters.Param[0] = myEncoderParameter;
             bitmap.Save(filename, myImageCodecInfo, myEncoderParameters);
         }
+        private void MoveImageToFolder(string selectedFolder)
+        {            
+            string destination = Path.Combine(CurrentFolder, selectedFolder, System.IO.Path.GetFileName(CurrentFile));
+            File.Move(CurrentFile, destination);
+            fileActionRepository.AddAction(ActionType.Move, CurrentFile, destination);
+            LoadNextImage(CurrentFolder);
+            logger.Debug(string.Format("Moving file {0} to {1}", CurrentFile, destination));
+        }
+        private void SkipFile(string file)
+        {
 
+        }
         private static ImageCodecInfo GetEncoderInfo(String mimeType)
         {
             int j;
