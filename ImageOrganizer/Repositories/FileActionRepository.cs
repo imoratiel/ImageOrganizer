@@ -28,7 +28,7 @@ namespace ImageOrganizer.Repositories
 
         public FileAction GetLastItem()
         {
-            return dbContext.FileAction!=null && dbContext.FileAction.Count() > 0 ? dbContext.FileAction.OrderByDescending(x => x.timestamp).FirstOrDefault() : null;
+            return dbContext.FileAction!=null && dbContext.FileAction.Count() > 0 ? dbContext.FileAction.Where(x => x.actionType!=ActionType.Skip).OrderByDescending(x => x.timestamp).FirstOrDefault() : null;
         }
         public List<string> GetSkippedItems(string folder)
         {

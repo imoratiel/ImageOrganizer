@@ -12,6 +12,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net.Cache;
+using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
@@ -29,6 +30,7 @@ namespace ImageOrganizer
         private List<FolderItem> folderItems = new List<FolderItem>();                
         private NotificationManager notificationManager;
         private FileActionRepository fileActionRepository;
+        private string LastFileHash =null;
 
         public IConfiguration Configuration { get; private set; }
 
@@ -116,7 +118,8 @@ namespace ImageOrganizer
             try
             {
                 string selectedFolder = obj.Content.ToString();
-                MoveImageToFolder(selectedFolder);
+                bool overwriteFileIfExists = toggleFileExists.IsChecked.GetValueOrDefault();
+                MoveImageToFolder(selectedFolder, overwriteFileIfExists);
             }
             catch (Exception ex)
             {
@@ -277,7 +280,6 @@ namespace ImageOrganizer
                 ShowErrorMessage(ex.Message);
             }
         }
-
         /// <summary>
         /// Returns true if image is loaded
         /// </summary>
@@ -287,6 +289,9 @@ namespace ImageOrganizer
         {
             try
             {
+                CheckDuplicatedFile(imgPath);
+                LastFileHash = (new FileHash()).GetHashSha256(imgPath);                
+
                 imgMain.Source = null;
 
                 BitmapImage bitmap = new BitmapImage();
@@ -358,11 +363,18 @@ namespace ImageOrganizer
             myEncoderParameters.Param[0] = myEncoderParameter;
             bitmap.Save(filename, myImageCodecInfo, myEncoderParameters);
         }
-        private void MoveImageToFolder(string selectedFolder)
-        {            
+        private void MoveImageToFolder(string selectedFolder, bool overwriteFileIfExists)
+        {   
             string destination = Path.Combine(CurrentFolder, selectedFolder, System.IO.Path.GetFileName(CurrentFile));
-            File.Move(CurrentFile, destination);
-            fileActionRepository.AddAction(ActionType.Move, CurrentFile, destination);
+            if (overwriteFileIfExists || File.Exists(destination) == false)
+            {
+                File.Move(CurrentFile, destination,true);
+                fileActionRepository.AddAction(ActionType.Move, CurrentFile, destination);                
+            }
+            else
+            {
+                ShowInfoMessage("File already exists in destination folder");
+            }
             LoadNextImage(CurrentFolder);
             logger.Debug(string.Format("Moving file {0} to {1}", CurrentFile, destination));
         }
@@ -370,6 +382,16 @@ namespace ImageOrganizer
         {
             fileActionRepository.AddAction(ActionType.Skip, CurrentFile, null);
         }
+
+        private void CheckDuplicatedFile(string file)
+        {
+            string hash = (new FileHash()).GetHashSha256(file);
+            if(LastFileHash != null && hash == LastFileHash)
+            {
+                ShowInfoMessage(string.Format("Duplicated file {0}, same hash as last loaded image", Path.GetFileNameWithoutExtension(file)), null, 20);
+            } 
+        }
+
         private static ImageCodecInfo GetEncoderInfo(String mimeType)
         {
             int j;
@@ -393,6 +415,10 @@ namespace ImageOrganizer
         private void ShowWarningMessage(string message, Action method = null)
         {
             ShowMessage("Warning", message, System.Windows.Media.Colors.Orange, System.Windows.Media.Colors.Black, 5, method);
+        }
+        private void ShowInfoMessage(string message, Action method = null, int seconds = 5)
+        {
+            ShowMessage("Info", message, System.Windows.Media.Colors.ForestGreen, System.Windows.Media.Colors.White, seconds, method);
         }
         private void ShowMessage(string title, string message, System.Windows.Media.Color foreground, System.Windows.Media.Color background, int seconds, Action method)
         {
