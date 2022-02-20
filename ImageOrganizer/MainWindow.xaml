@@ -86,6 +86,7 @@
             </ComboBox>
             <Button x:Name="btnScanFolder" Margin="5,0,0,0" Click="ButtonScanFolder_Click">Scan Folder</Button>
             <Button x:Name="btnAddFolder" Margin="5,0,0,0" Click="ButtonAddFolder_Click">Add Folder</Button>
+            <Button x:Name="btnResetSkippedFiles" Margin="5,0,0,0">Reset Ignored Files in Folder</Button>
         </StackPanel>
 
         <Image Grid.Row="1" Grid.Column="0" Name="imgMain" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform" />

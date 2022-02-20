@@ -36,20 +36,20 @@ namespace ImageOrganizer
 
         public MainWindow(IConfiguration configuration, FileActionDbContext dbContext)
         {
-            InitializeComponent();
+            InitializeComponent();            
 
-            Initialize(configuration);
-
-            fileActionRepository = new FileActionRepository(dbContext);
+            Initialize(configuration, dbContext);
 
             logger.Debug(string.Format("Current Action Queue"));
             fileActionRepository.Print();
         }
 
-        public void Initialize(IConfiguration configuration)
+        public void Initialize(IConfiguration configuration, FileActionDbContext dbContext)
         {
             this.notificationManager = new NotificationManager();
             this.Configuration = configuration;
+
+            fileActionRepository = new FileActionRepository(dbContext);
 
             if (bool.Parse(Configuration["Startup:Enabled"]))
             {
@@ -128,6 +128,7 @@ namespace ImageOrganizer
             try
             {
                 SkipFile(CurrentFile);
+                LoadNextImage(CurrentFolder);
             }
             catch (Exception ex)
             {
@@ -256,6 +257,9 @@ namespace ImageOrganizer
                 int numberOfFiles = ImagesInDirectory.Count();
                 lblBottomRight.Content = String.Format("{0} of {1}", 1, numberOfFiles);
 
+                List<string> skippedFiles = fileActionRepository.GetSkippedItems(folder);
+                ImagesInDirectory.RemoveAll(x => skippedFiles.Contains(x));                
+
                 string image = ImagesInDirectory.First();
                 if (LoadImage(image))
                 {
@@ -364,7 +368,7 @@ namespace ImageOrganizer
         }
         private void SkipFile(string file)
         {
-
+            fileActionRepository.AddAction(ActionType.Skip, CurrentFile, null);
         }
         private static ImageCodecInfo GetEncoderInfo(String mimeType)
         {

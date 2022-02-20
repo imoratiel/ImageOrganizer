@@ -30,6 +30,15 @@ namespace ImageOrganizer.Repositories
         {
             return dbContext.FileAction!=null && dbContext.FileAction.Count() > 0 ? dbContext.FileAction.OrderByDescending(x => x.timestamp).FirstOrDefault() : null;
         }
+        public List<string> GetSkippedItems(string folder)
+        {
+            if(dbContext.FileAction != null && dbContext.FileAction.Count() > 0)
+            {
+                List<FileAction> listActions = dbContext.FileAction.Where(x => x.actionType == ActionType.Skip && x.source.StartsWith(folder)).ToList();
+                return listActions!=null ? listActions.Select(x => x.source).ToList() : null;
+            }
+            return null;
+        }
 
         public void RemoveLastItem()
         {
