@@ -240,7 +240,8 @@ namespace ImageOrganizer
                         Content = System.IO.Path.GetFileName(item),
                         HorizontalAlignment = HorizontalAlignment.Left,
                         Margin = new Thickness(0, 5, 0, 0),
-                        Width = 110
+                        Width = 110,
+                        Height = 30
                     };
                     btn.Click += BtnMoveImageToFolder_Click;
                     SubFoldersButtonPanel.Children.Add(btn);
@@ -269,7 +270,7 @@ namespace ImageOrganizer
                 List<string> skippedFiles = fileActionRepository.GetSkippedItems(folder);
                 ImagesInDirectory.RemoveAll(x => skippedFiles.Contains(x));
 
-                lblBottomRight.Content = String.Format("{0} of {1}  {2}%", skippedFiles.Count + 1, numberOfFiles, (skippedFiles.Count + 1) * 100 / numberOfFiles);
+                lblBottomRight.Content = String.Format("{0} of {1}  {2}%", skippedFiles.Count + 1, numberOfFiles, Math.Floor((double)(skippedFiles.Count + 1) * 100 / numberOfFiles));
 
                 string image = ImagesInDirectory.First();
                 if (LoadImage(image))
