@@ -70,5 +70,10 @@ namespace ImageOrganizer.Repositories
             dbContext.FileAction.RemoveRange(items);
             dbContext.SaveChanges();
         }
+
+        public List<FileAction> GetScannedFolders()
+        {
+            return dbContext.FileAction.Where(x => x.actionType == ActionType.ScanFolder).OrderBy(x => x.timestamp).ToList();
+        }
     }
 }

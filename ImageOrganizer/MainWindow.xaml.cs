@@ -53,11 +53,15 @@ namespace ImageOrganizer
 
             fileActionRepository = new FileActionRepository(dbContext);
 
-            if (bool.Parse(Configuration["Startup:Enabled"]))
+            List<FileAction> ScannedFolders = fileActionRepository.GetScannedFolders();
+            foreach (FileAction item in ScannedFolders)
             {
-                string initialFolder = Configuration["Startup:Folder"];
-                AddFolderToCombobox(initialFolder);
-                ScanFolder(initialFolder);
+                AddFolderToCombobox(item.source);
+            }
+            FileAction lastFolder = ScannedFolders.Last();
+            if(lastFolder != null)
+            {
+                ScanFolder(lastFolder.source);
             }
         }
 
@@ -66,7 +70,6 @@ namespace ImageOrganizer
         {
             ScanFolder(CurrentFolder);
         }
-
         private void ButtonAddFolder_Click(object sender, RoutedEventArgs e)
         {
             System.Windows.Forms.FolderBrowserDialog fbd = new System.Windows.Forms.FolderBrowserDialog();
@@ -77,7 +80,6 @@ namespace ImageOrganizer
                 AddFolderToCombobox(fbd.SelectedPath);
             }
         }
-
         private void ButtonRotate_Click(object sender, RoutedEventArgs e)
         {
             if (CurrentFile != null)
@@ -94,7 +96,6 @@ namespace ImageOrganizer
                 LoadImage(CurrentFile);
             }
         }
-
         private void ButtonOpen_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -189,7 +190,6 @@ namespace ImageOrganizer
                 ShowErrorMessage(ex.Message);
             }
         }
-
         private void ButtonResetIgnored_Click(object sender, RoutedEventArgs e)
         {
             fileActionRepository.ResetSkippedFiles(CurrentFolder);
@@ -219,6 +219,12 @@ namespace ImageOrganizer
 
                 CbdFolder.Items.Insert(0, item.Name);
                 CbdFolder.SelectedIndex = 0;
+
+                if(fileActionRepository.GetScannedFolders().Where(x => x.source == CurrentFolder).Count() == 0)
+                {
+                    fileActionRepository.AddAction(ActionType.ScanFolder, CurrentFolder, null);
+                    fileActionRepository.Print();
+                }                
             }
             else
             {
@@ -391,13 +397,12 @@ namespace ImageOrganizer
         {
             fileActionRepository.AddAction(ActionType.Skip, CurrentFile, null);
         }
-
         private void CheckDuplicatedFile(string file)
         {
             string hash = (new FileHash()).GetHashSha256(file);
             if(LastFileHash != null && hash == LastFileHash)
             {
-                ShowInfoMessage(string.Format("Duplicated file {0}, same hash as last loaded image", Path.GetFileNameWithoutExtension(file)), null, 20);
+                ShowInfoMessage(string.Format("Duplicated file {0}, same hash as last loaded image", Path.GetFileNameWithoutExtension(file)), null, 15);
             } 
         }
 

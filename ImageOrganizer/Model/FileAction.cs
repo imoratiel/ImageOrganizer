@@ -10,7 +10,10 @@ namespace ImageOrganizer.Model
         Move,
         RotateLeft,
         RoteteRight,
-        Skip
+        Skip,
+        ScanFolder,
+        GetDuplicated,
+        MoveDuplicated
     }
     public class FileAction
     {
