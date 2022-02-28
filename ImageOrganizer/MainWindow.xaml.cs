@@ -190,6 +190,12 @@ namespace ImageOrganizer
             }
         }
 
+        private void ButtonResetIgnored_Click(object sender, RoutedEventArgs e)
+        {
+            fileActionRepository.ResetSkippedFiles(CurrentFolder);
+            LoadNextImage(CurrentFolder);
+        }
+
         #endregion
 
         #region FUNCTIONS
@@ -255,13 +261,15 @@ namespace ImageOrganizer
                 string[] fileExtension = new string[] { ".jpg", ".png", ".jpeg", ".bmp", ".gif" };
                 List<string> ImagesInDirectory = Directory.GetFiles(folder, "*.*", SearchOption.TopDirectoryOnly)
                     .Where(file => fileExtension.Contains(System.IO.Path.GetExtension(file).ToLower()))
+                    .OrderBy(file => System.IO.Path.GetFileName(file))
                     .ToList();
 
                 int numberOfFiles = ImagesInDirectory.Count();
-                lblBottomRight.Content = String.Format("{0} of {1}", 1, numberOfFiles);
 
                 List<string> skippedFiles = fileActionRepository.GetSkippedItems(folder);
-                ImagesInDirectory.RemoveAll(x => skippedFiles.Contains(x));                
+                ImagesInDirectory.RemoveAll(x => skippedFiles.Contains(x));
+
+                lblBottomRight.Content = String.Format("{0} of {1}  {2}%", skippedFiles.Count + 1, numberOfFiles, (skippedFiles.Count + 1) * 100 / numberOfFiles);
 
                 string image = ImagesInDirectory.First();
                 if (LoadImage(image))

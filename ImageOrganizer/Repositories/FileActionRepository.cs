@@ -63,5 +63,12 @@ namespace ImageOrganizer.Repositories
                 logger.Debug(string.Format("Item {0} {1} {2} {3} {4}", item.Id, item.actionType, item.source, item.destination, item.timestamp));
             }
         }
+
+        public void ResetSkippedFiles(string folder)
+        {
+            List<FileAction> items = dbContext.FileAction.Where(x => x.source.StartsWith(folder) && x.actionType == ActionType.Skip).ToList();
+            dbContext.FileAction.RemoveRange(items);
+            dbContext.SaveChanges();
+        }
     }
 }
