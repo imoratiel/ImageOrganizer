@@ -4,6 +4,7 @@ using ImageOrganizer.Repositories;
 using Microsoft.Extensions.Configuration;
 using NLog;
 using Notification.Wpf;
+using ns;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -58,7 +59,7 @@ namespace ImageOrganizer
             {
                 AddFolderToCombobox(item.source);
             }
-            FileAction lastFolder = ScannedFolders.Last();
+            FileAction lastFolder = ScannedFolders.LastOrDefault();
             if(lastFolder != null)
             {
                 ScanFolder(lastFolder.source);
@@ -68,6 +69,8 @@ namespace ImageOrganizer
         #region EVENTS
         private void ButtonScanFolder_Click(object sender, RoutedEventArgs e)
         {
+            string selectedItem = CbdFolder.SelectedItem.ToString();
+
             ScanFolder(CurrentFolder);
         }
         private void ButtonAddFolder_Click(object sender, RoutedEventArgs e)
@@ -172,6 +175,7 @@ namespace ImageOrganizer
                             break;
                         case ActionType.Skip:
                             fileActionRepository.RemoveLastItem();
+                            LoadNextImage(CurrentFolder);
                             break;
                         default:
                             ShowErrorMessage("Something smells rotten in Denmark");
@@ -252,8 +256,11 @@ namespace ImageOrganizer
                     btn.Click += BtnMoveImageToFolder_Click;
                     SubFoldersButtonPanel.Children.Add(btn);
                 }
-
+                                
+                LastFileHash = null;
                 LoadNextImage(folder);
+
+                fileActionRepository.UpdateScannedFolder(folder);
             }
             catch (Exception ex)
             {
@@ -270,6 +277,17 @@ namespace ImageOrganizer
                     .Where(file => fileExtension.Contains(System.IO.Path.GetExtension(file).ToLower()))
                     .OrderBy(file => System.IO.Path.GetFileName(file))
                     .ToList();
+
+                //DirectoryInfo directoryInfo = new DirectoryInfo(folder);
+                //FileInfo[] list = directoryInfo.GetFiles().Take(100).ToArray();
+
+
+                //ns.StringComparer sc = new ns.StringComparer(); // new object
+                //Array.Sort(list, sc);
+                //list.Sort((a, b) => string.Compare(a.Name, b.Name));
+
+
+                //List<string> ImagesInDirectory = list.ToList().Where(file => fileExtension.Contains(System.IO.Path.GetExtension(file.Name).ToLower())).Select(x => x.FullName).ToList();
 
                 int numberOfFiles = ImagesInDirectory.Count();
 

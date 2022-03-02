@@ -5,9 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ImageOrganizer"
         mc:Ignorable="d"
-        FontSize="10" FontFamily="Calibri"
-        Title="MainWindow" Height="1200" Width="1600" >
-    <!--WindowState="Maximized"-->
+        FontSize="12" FontFamily="Calibri"
+        Title="MainWindow" 
+        WindowState="Maximized" >
+    <!--Height="1200" Width="1600"-->
 
     <Window.Resources>
         <Style x:Key="ButtonFocusVisual">

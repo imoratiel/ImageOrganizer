@@ -28,7 +28,7 @@ namespace ImageOrganizer.Repositories
 
         public FileAction GetLastItem()
         {
-            return dbContext.FileAction!=null && dbContext.FileAction.Count() > 0 ? dbContext.FileAction.Where(x => x.actionType!=ActionType.Skip).OrderByDescending(x => x.timestamp).FirstOrDefault() : null;
+            return dbContext.FileAction!=null && dbContext.FileAction.Count() > 0 ? dbContext.FileAction.Where(x => x.actionType != ActionType.ScanFolder && x.actionType != ActionType.GetDuplicated).OrderByDescending(x => x.timestamp).FirstOrDefault() : null;
         }
         public List<string> GetSkippedItems(string folder)
         {
@@ -74,6 +74,13 @@ namespace ImageOrganizer.Repositories
         public List<FileAction> GetScannedFolders()
         {
             return dbContext.FileAction.Where(x => x.actionType == ActionType.ScanFolder).OrderBy(x => x.timestamp).ToList();
+        }
+
+        public void UpdateScannedFolder(string folder)
+        {
+            FileAction action = dbContext.FileAction.Where(x => x.actionType == ActionType.ScanFolder && x.source == folder).FirstOrDefault();
+            action.timestamp = DateTime.Now;
+            dbContext.FileAction.Update(action);
         }
     }
 }
