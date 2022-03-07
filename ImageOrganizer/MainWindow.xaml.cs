@@ -4,7 +4,6 @@ using ImageOrganizer.Repositories;
 using Microsoft.Extensions.Configuration;
 using NLog;
 using Notification.Wpf;
-using ns;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,7 +12,6 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net.Cache;
-using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
@@ -278,17 +276,6 @@ namespace ImageOrganizer
                     .OrderBy(file => System.IO.Path.GetFileName(file))
                     .ToList();
 
-                //DirectoryInfo directoryInfo = new DirectoryInfo(folder);
-                //FileInfo[] list = directoryInfo.GetFiles().Take(100).ToArray();
-
-
-                //ns.StringComparer sc = new ns.StringComparer(); // new object
-                //Array.Sort(list, sc);
-                //list.Sort((a, b) => string.Compare(a.Name, b.Name));
-
-
-                //List<string> ImagesInDirectory = list.ToList().Where(file => fileExtension.Contains(System.IO.Path.GetExtension(file.Name).ToLower())).Select(x => x.FullName).ToList();
-
                 int numberOfFiles = ImagesInDirectory.Count();
 
                 List<string> skippedFiles = fileActionRepository.GetSkippedItems(folder);
@@ -313,6 +300,7 @@ namespace ImageOrganizer
                 ShowErrorMessage(ex.Message);
             }
         }
+
         /// <summary>
         /// Returns true if image is loaded
         /// </summary>
@@ -322,8 +310,12 @@ namespace ImageOrganizer
         {
             try
             {
+                imgMain.Source = null;
+
                 CheckDuplicatedFile(imgPath);
-                LastFileHash = (new FileHash()).GetHashSha256(imgPath);                
+                LastFileHash = (new FileHash()).GetHashSha256(imgPath);
+
+                Rotation rotation = ImageUtil.GetRotateFromExif(imgPath);
 
                 imgMain.Source = null;
 
@@ -334,9 +326,13 @@ namespace ImageOrganizer
                 bitmap.UriCachePolicy = new RequestCachePolicy(RequestCacheLevel.BypassCache);
                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
                 bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+
+                bitmap.Rotation = rotation;
+
                 bitmap.EndInit();
 
                 imgMain.Source = bitmap;
+
                 return true;
             }
             catch (Exception ex)
@@ -345,6 +341,7 @@ namespace ImageOrganizer
                 return false;
             }
         }
+
         private bool RotateImage(string path, RotateFlip rotation)
         {
             try
