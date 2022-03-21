@@ -313,15 +313,17 @@ namespace ImageOrganizer
                 imgMain.Source = null;
 
                 CheckDuplicatedFile(imgPath);
-                LastFileHash = (new FileHash()).GetHashSha256(imgPath);
 
-                Rotation rotation = ImageUtil.GetRotateFromExif(imgPath);
+                string tempfileName = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + Path.GetExtension(imgPath));
+                File.Copy(imgPath, tempfileName, true);
 
-                imgMain.Source = null;
+                LastFileHash = (new FileHash()).GetHashSha256(tempfileName);
+
+                Rotation rotation = ImageUtil.GetRotateFromExif(tempfileName);
 
                 BitmapImage bitmap = new BitmapImage();
                 bitmap.BeginInit();
-                bitmap.UriSource = new Uri(imgPath);
+                bitmap.UriSource = new Uri(tempfileName);
                 bitmap.CacheOption = BitmapCacheOption.None;
                 bitmap.UriCachePolicy = new RequestCachePolicy(RequestCacheLevel.BypassCache);
                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
