@@ -110,9 +110,24 @@ namespace ImageOrganizer
             }
             catch (Exception ex)
             {
+                ShowErrorMessage(String.Format("Error deleting file {0}: {1}", CurrentFile, ex.Message));
+            }
+        }
+
+        private void ButtonDelete_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                File.Delete(CurrentFile);
+
+                ScanFolder(CurrentFolder);
+            }
+            catch (Exception ex)
+            {
                 ShowErrorMessage(String.Format("Error openning file {0}: {1}", CurrentFile, ex.Message));
             }
         }
+
         private void BtnMoveImageToFolder_Click(object sender, RoutedEventArgs e)
         {
             System.Windows.Controls.Button obj = sender as System.Windows.Controls.Button;
@@ -281,7 +296,7 @@ namespace ImageOrganizer
                 List<string> skippedFiles = fileActionRepository.GetSkippedItems(folder);
                 ImagesInDirectory.RemoveAll(x => skippedFiles.Contains(x));
 
-                lblBottomRight.Content = String.Format("{0} of {1}  {2}%", skippedFiles.Count + 1, numberOfFiles, Math.Floor((double)(skippedFiles.Count + 1) * 100 / numberOfFiles));
+                lblBottomRight.Content = String.Format("{0} of {1} {2}%", skippedFiles.Count + 1, numberOfFiles, Math.Floor((double)(skippedFiles.Count + 1) * 100 / numberOfFiles));
 
                 string image = ImagesInDirectory.First();
                 if (LoadImage(image))
