@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml.Linq;
 
 namespace ImageOrganizer.Repositories
 {
@@ -74,6 +75,19 @@ namespace ImageOrganizer.Repositories
         public List<FileAction> GetScannedFolders()
         {
             return dbContext.FileAction.Where(x => x.actionType == ActionType.ScanFolder).OrderBy(x => x.timestamp).ToList();
+        }
+
+        public FileAction GetScannedFolderByName(string name)
+        {
+            List<FileAction> candidates = dbContext.FileAction.Where(x => x.actionType == ActionType.ScanFolder && x.source.Length >= name.Length && x.source.Contains(name)).OrderBy(x => x.timestamp).ToList();
+            if(candidates.Count == 1)
+            {
+                return candidates.First();
+            }
+            else
+            {
+                return candidates.Where(x => x.source.Substring(x.source.Length - name.Length) == name).OrderBy(x => x.timestamp).FirstOrDefault();
+            }               
         }
 
         public void UpdateScannedFolder(string folder)

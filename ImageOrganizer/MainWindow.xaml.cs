@@ -69,7 +69,11 @@ namespace ImageOrganizer
         {
             string selectedItem = CbdFolder.SelectedItem.ToString();
 
-            ScanFolder(CurrentFolder);
+            FileAction folder = fileActionRepository.GetScannedFolderByName(selectedItem);
+
+            CurrentFolder = folder.source;
+
+            ScanFolder(folder.source);
         }
         private void ButtonAddFolder_Click(object sender, RoutedEventArgs e)
         {
@@ -195,7 +199,7 @@ namespace ImageOrganizer
                             break;
                     }
 
-                    fileActionRepository.Print();
+                    //fileActionRepository.Print();
                 }
                 else
                 {
@@ -288,7 +292,7 @@ namespace ImageOrganizer
                 string[] fileExtension = new string[] { ".jpg", ".png", ".jpeg", ".bmp", ".gif" };
                 List<string> ImagesInDirectory = Directory.GetFiles(folder, "*.*", SearchOption.TopDirectoryOnly)
                     .Where(file => fileExtension.Contains(System.IO.Path.GetExtension(file).ToLower()))
-                    .OrderBy(file => System.IO.Path.GetFileName(file))
+                    .OrderBy(file => System.IO.Path.GetFileNameWithoutExtension(file))
                     .ToList();
 
                 int numberOfFiles = ImagesInDirectory.Count();
