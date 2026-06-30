@@ -45,7 +45,7 @@ namespace ImageOrganizer.Repositories
                 // Usar expresión lambda como Expression<Func<T, bool>> para evitar ambigüedad
                 List<FileAction> listActions = dbContext.FileAction
                 .AsEnumerable() // Aquí empieza LINQ to Objects
-                .Where(x => x.actionType == ActionType.Skip && x.source.StartsWith(folder))
+                .Where(x => x.source != null && x.actionType == ActionType.Skip && x.source.StartsWith(folder))
                 .ToList();
                 return listActions != null ? listActions.Select(x => x.source).ToList() : null;
             }
@@ -79,7 +79,7 @@ namespace ImageOrganizer.Repositories
         public void ResetSkippedFiles(string folder)
         {
             List<FileAction> items = dbContext.FileAction
-                .Where(x => x.source.StartsWith(folder) && x.actionType == ActionType.Skip)
+                .Where(x => x.source != null && x.source.StartsWith(folder) && x.actionType == ActionType.Skip)
                 .ToList();
             dbContext.FileAction.RemoveRange(items);
             dbContext.SaveChanges();
