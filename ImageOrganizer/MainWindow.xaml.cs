@@ -289,7 +289,7 @@ namespace ImageOrganizer
             try
             {
                 // Images
-                string[] fileExtension = new string[] { ".jpg", ".png", ".jpeg", ".bmp", ".gif" };
+                string[] fileExtension = new string[] { ".jpg", ".png", ".jpeg", ".bmp", ".gif", ".jfif" };
                 List<string> ImagesInDirectory = Directory.GetFiles(folder, "*.*", SearchOption.TopDirectoryOnly)
                     .Where(file => fileExtension.Contains(System.IO.Path.GetExtension(file).ToLower()))
                     .OrderBy(file => System.IO.Path.GetFileNameWithoutExtension(file))
@@ -385,6 +385,7 @@ namespace ImageOrganizer
             switch (fileExtension)
             {
                 case ".jpg":
+                case ".jfif":
                 case ".jpeg":
                     SaveImageJpeg(bitmap, filename);
                     break;
