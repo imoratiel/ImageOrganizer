@@ -1,6 +1,7 @@
 ﻿using ImageOrganizer.Model;
 using NLog;
 using System;
+using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 
@@ -40,16 +41,26 @@ namespace ImageOrganizer.Repositories
         }
         public List<string> GetSkippedItems(string folder)
         {
-            if (dbContext.FileAction != null && dbContext.FileAction.Count() > 0)
-            {
-                // Usar expresión lambda como Expression<Func<T, bool>> para evitar ambigüedad
-                List<FileAction> listActions = dbContext.FileAction
+            if (dbContext.FileAction == null)
+                return new List<string>();
+
+            // Solo archivos directamente en la carpeta, no en subcarpetas ni en carpetas con el mismo prefijo
+            return dbContext.FileAction
                 .AsEnumerable() // Aquí empieza LINQ to Objects
-                .Where(x => x.source != null && x.actionType == ActionType.Skip && x.source.StartsWith(folder))
+                .Where(x => x.actionType == ActionType.Skip && IsFileInFolder(x.source, folder))
+                .Select(x => x.source)
                 .ToList();
-                return listActions != null ? listActions.Select(x => x.source).ToList() : null;
-            }
-            return null;
+        }
+
+        private static bool IsFileInFolder(string file, string folder)
+        {
+            if (file == null || folder == null)
+                return false;
+            string fileFolder = Path.GetDirectoryName(file);
+            return fileFolder != null && string.Equals(
+                Path.TrimEndingDirectorySeparator(fileFolder),
+                Path.TrimEndingDirectorySeparator(folder),
+                StringComparison.OrdinalIgnoreCase);
         }
 
         public void RemoveLastItem()
@@ -79,7 +90,8 @@ namespace ImageOrganizer.Repositories
         public void ResetSkippedFiles(string folder)
         {
             List<FileAction> items = dbContext.FileAction
-                .Where(x => x.source != null && x.source.StartsWith(folder) && x.actionType == ActionType.Skip)
+                .AsEnumerable()
+                .Where(x => x.actionType == ActionType.Skip && IsFileInFolder(x.source, folder))
                 .ToList();
             dbContext.FileAction.RemoveRange(items);
             dbContext.SaveChanges();
@@ -93,29 +105,16 @@ namespace ImageOrganizer.Repositories
                 .ToList();
         }
 
-        public FileAction GetScannedFolderByName(string name)
-        {
-            List<FileAction> candidates = dbContext.FileAction
-                .Where(x => x.actionType == ActionType.ScanFolder && x.source.Length >= name.Length && x.source.Contains(name))
-                .OrderBy(x => x.timestamp)
-                .ToList();
-            if(candidates.Count == 1)
-            {
-                return candidates.First();
-            }
-            else
-            {
-                return candidates.Where(x => x.source.Substring(x.source.Length - name.Length) == name).OrderBy(x => x.timestamp).FirstOrDefault();
-            }               
-        }
-
         public void UpdateScannedFolder(string folder)
         {
             FileAction action = dbContext.FileAction
                 .Where(x => x.actionType == ActionType.ScanFolder && x.source == folder)
                 .FirstOrDefault();
+            if (action == null)
+                return;
             action.timestamp = DateTime.Now;
             dbContext.FileAction.Update(action);
+            dbContext.SaveChanges();
         }
     }
 }

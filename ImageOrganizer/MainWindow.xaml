@@ -82,7 +82,7 @@
 
         <StackPanel Orientation="Horizontal" Margin="10">
             <Label Content="Image Source" />
-            <ComboBox x:Name="CbdFolder" Grid.Row="0" Height="23" Width="200" Grid.Column="1" SelectedIndex="0">
+            <ComboBox x:Name="CbdFolder" Grid.Row="0" Height="23" Width="200" Grid.Column="1" SelectedIndex="0" DisplayMemberPath="DisplayName">
                 <ComboBoxItem Content="None"/>
             </ComboBox>
             <Button x:Name="btnScanFolder" Margin="5,0,0,0" Click="ButtonScanFolder_Click">Scan Folder</Button>
