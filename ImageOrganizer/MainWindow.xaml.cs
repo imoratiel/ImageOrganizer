@@ -67,13 +67,10 @@ namespace ImageOrganizer
         #region EVENTS
         private void ButtonScanFolder_Click(object sender, RoutedEventArgs e)
         {
-            string selectedItem = CbdFolder.SelectedItem.ToString();
-
-            FileAction folder = fileActionRepository.GetScannedFolderByName(selectedItem);
-
-            CurrentFolder = folder.source;
-
-            ScanFolder(folder.source);
+            if (CbdFolder.SelectedItem is FolderItem folder)
+            {
+                ScanFolder(folder.Path);
+            }
         }
         private void ButtonAddFolder_Click(object sender, RoutedEventArgs e)
         {
@@ -223,10 +220,8 @@ namespace ImageOrganizer
 
         private void AddFolderToCombobox(string pathToAdd)
         {
-            if (folderItems.Where(i => i.Path == pathToAdd).Count() == 0)
+            if (folderItems.Where(i => string.Equals(i.Path, pathToAdd, StringComparison.OrdinalIgnoreCase)).Count() == 0)
             {
-                CurrentFolder = pathToAdd;
-
                 if (folderItems.Count == 0)
                 {
                     CbdFolder.Items.Clear();
@@ -234,28 +229,41 @@ namespace ImageOrganizer
 
                 FolderItem item = new FolderItem();
                 item.TimestampAdded = DateTime.Now;
-                item.Path = CurrentFolder;
-                item.Name = System.IO.Path.GetFileName(CurrentFolder);
+                item.Path = pathToAdd;
+                item.Name = System.IO.Path.GetFileName(pathToAdd);
                 folderItems.Insert(0, item);
 
-                CbdFolder.Items.Insert(0, item.Name);
+                CbdFolder.Items.Insert(0, item);
+                UpdateFolderDisplayNames();
                 CbdFolder.SelectedIndex = 0;
 
-                if(fileActionRepository.GetScannedFolders().Where(x => x.source == CurrentFolder).Count() == 0)
+                if(fileActionRepository.GetScannedFolders().Where(x => x.source == pathToAdd).Count() == 0)
                 {
-                    fileActionRepository.AddAction(ActionType.ScanFolder, CurrentFolder, null);
+                    fileActionRepository.AddAction(ActionType.ScanFolder, pathToAdd, null);
                     fileActionRepository.Print();
-                }                
+                }
             }
             else
             {
                 ShowErrorMessage("Folder already exists");
             }
         }
+        private void UpdateFolderDisplayNames()
+        {
+            foreach (FolderItem item in folderItems)
+            {
+                bool duplicatedName = folderItems.Count(i => string.Equals(i.Name, item.Name, StringComparison.OrdinalIgnoreCase)) > 1;
+                item.DisplayName = duplicatedName
+                    ? Path.Combine(Path.GetFileName(Path.GetDirectoryName(item.Path)), item.Name)
+                    : item.Name;
+            }
+            CbdFolder.Items.Refresh();
+        }
         private void ScanFolder(string folder)
         {
             try
             {
+                CurrentFolder = folder;
                 SubFoldersButtonPanel.Children.Clear();
 
                 //Folder Scanning
@@ -297,10 +305,23 @@ namespace ImageOrganizer
 
                 int numberOfFiles = ImagesInDirectory.Count();
 
-                List<string> skippedFiles = fileActionRepository.GetSkippedItems(folder);
+                HashSet<string> skippedFiles = new HashSet<string>(fileActionRepository.GetSkippedItems(folder), StringComparer.OrdinalIgnoreCase);
                 ImagesInDirectory.RemoveAll(x => skippedFiles.Contains(x));
 
-                lblBottomRight.Content = String.Format("{0} of {1} {2}%", skippedFiles.Count + 1, numberOfFiles, Math.Floor((double)(skippedFiles.Count + 1) * 100 / numberOfFiles));
+                // Only skipped files that still exist in the folder count as processed
+                int processedFiles = numberOfFiles - ImagesInDirectory.Count;
+
+                if (ImagesInDirectory.Count == 0)
+                {
+                    CurrentFile = null;
+                    imgMain.Source = null;
+                    lblBottomLeft.Content = "No images left";
+                    lblBottomRight.Content = String.Format("{0} of {1}", processedFiles, numberOfFiles);
+                    ShowInfoMessage("No images left in folder");
+                    return;
+                }
+
+                lblBottomRight.Content = String.Format("{0} of {1} {2}%", processedFiles + 1, numberOfFiles, Math.Floor((double)(processedFiles + 1) * 100 / numberOfFiles));
 
                 string image = ImagesInDirectory.First();
                 if (LoadImage(image))
